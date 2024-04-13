@@ -1,37 +1,25 @@
 import { Controller, Get } from '@nestjs/common';
 import { AppService } from './app.service';
 import { exec } from 'child_process';
-import { run } from 'cypress';
 
 @Controller()
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
   @Get('hello')
-  async getHello(): Promise<string> {
+  async getHello(): Promise<any> {
     const { stdout } = await sh(`cat /proc/1/cgroup | grep 'docker/' | tail -1`);
-    console.log(stdout);
     let sum;
     for (let i = 0; i < 523123e4; i++) {
       sum += i / 2323 - 33;
     }
-    return sum;
+    return { id: stdout, result: sum };
   }
 
   @Get('hello1')
-  async getHello1(): Promise<string> {
+  async getHello1(): Promise<any> {
     const { stdout } = await sh(`cat /proc/1/cgroup | grep 'docker/' | tail -1`);
-    console.log(stdout);
-    return this.appService.getHello();
-  }
-
-  @Get('cy')
-  async cy(): Promise<any> {
-    const result = await run({
-      browser: 'chrome',
-      spec: './cypress/e2e/mema.cy.js',
-    });
-    return result;
+    return { id: stdout, result: this.appService.getHello() };
   }
 }
 

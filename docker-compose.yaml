@@ -1,11 +1,11 @@
 version: '3.9'
 
-name: nestjs-scaling-test
+name: smart-home-conx-api
 
 networks:
   default:
     driver: bridge
-    name: nestjs-scaling-test
+    name: smart-home-conx-api
 
 services:
   backend01:
