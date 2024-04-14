@@ -1,0 +1,16 @@
+blitzer:
+  url: https://my-domain.com
+  type-whitelist:
+    - ts
+    - 1
+  box:
+    bottom-left:
+      - 23.456789
+      - 2.345678
+    top-right:
+      - 12.345678
+      - 3.456789
+  polygon:
+    - [12.345678, 3.456789]
+    - [23.456789, 4.567890]
+    - [34.567890, 5.678900]
