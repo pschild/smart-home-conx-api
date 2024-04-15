@@ -7,6 +7,8 @@ import { ConfigModule } from '@nestjs/config';
 import { BlitzerDeController } from './blitzer-de.controller';
 import configuration from './configuration';
 import { HttpModule } from '@nestjs/axios';
+import { TrafficService } from './traffic/traffic.service';
+import { TrafficController } from './traffic/traffic.controller';
 
 @Module({
   imports: [
@@ -16,7 +18,7 @@ import { HttpModule } from '@nestjs/axios';
       load: [configuration]
     })
   ],
-  controllers: [AppController, CypressController, BlitzerDeController],
-  providers: [AppService, CypressService],
+  controllers: [AppController, CypressController, BlitzerDeController, TrafficController],
+  providers: [AppService, CypressService, TrafficService],
 })
 export class AppModule {}

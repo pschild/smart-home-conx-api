@@ -3,6 +3,7 @@ import { Controller, Get } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { booleanPointInPolygon, point, polygon } from '@turf/turf';
 import { parse } from 'date-fns';
+import { template } from 'lodash';
 import { Observable, map } from 'rxjs';
 
 interface Poi {
@@ -44,8 +45,14 @@ export class BlitzerDeController {
 
   @Get('pois')
   getPois(): Observable<PoiDto[]> {
+    const url = template(this.configService.get('blitzer.url'))({
+      whitelist: this.configService.get('blitzer.type-whitelist').join(','),
+      bottomLeftLatLng: this.configService.get('blitzer.box.bottom-left').join(','),
+      topRightLatLng: this.configService.get('blitzer.box.top-right').join(',')
+    });
+
     const highPrioArea = polygon([this.configService.get<any>('blitzer.polygon')]);
-    return this.httpService.get<{ pois: Poi[] }>(this.buildUrl()).pipe(
+    return this.httpService.get<{ pois: Poi[] }>(url).pipe(
       map(response => response.data.pois),
       map(poiList => poiList.map(poi => ({
         createdAt: this.parseDate(poi.create_date).toISOString(),
@@ -68,14 +75,5 @@ export class BlitzerDeController {
     } else if (!!dayMatch) {
       return parse(dayMatch[0], 'dd.M.yyyy', new Date())
     }
-  }
-
-  private buildUrl(): string {
-    return [
-      this.configService.get<string>('blitzer.url'),
-      `?type=${this.configService.get('blitzer.type-whitelist').join(',')}`,
-      '&z=11',
-      `&box=${this.configService.get('blitzer.box.bottom-left').join(',')},${this.configService.get('blitzer.box.top-right').join(',')}`
-    ].join('');
   }
 }

@@ -1,3 +1,9 @@
+tomtom:
+  url: https://my-domain.com
+waze:
+  url: https://my-domain.com
+google-maps:
+  url: https://my-domain.com
 blitzer:
   url: https://my-domain.com
   type-whitelist:
