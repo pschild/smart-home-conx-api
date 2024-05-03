@@ -1,9 +1,9 @@
 import { HttpService } from '@nestjs/axios';
 import { Injectable, Logger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { add, format } from 'date-fns';
-import { Observable, catchError, map, of, tap } from 'rxjs';
-import { template } from 'lodash';
+import { add, addMinutes, format } from 'date-fns';
+import { Observable, catchError, forkJoin, map, of, tap, timeout } from 'rxjs';
+import { meanBy, template } from 'lodash';
 
 interface CommutingInfo {
   minutes: number;
@@ -48,12 +48,35 @@ export class TrafficService {
 
   private readonly logger = new Logger(TrafficService.name);
 
+  private static REQUEST_TIMEOUT = 1500;
+
   constructor(
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
   ) {}
 
-  getWazeInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
+  getCombinedResult(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
+    return forkJoin({
+      tomtomInfo: this.getTomTomInfo(fromLat, fromLng, toLat, toLng),
+      wazeInfo: this.getWazeInfo(fromLat, fromLng, toLat, toLng),
+      googleMapsInfo: this.getGoogleMapsInfo(fromLat, fromLng, toLat, toLng)
+    }).pipe(
+      map(results => Object.fromEntries(Object.entries(results).filter(([_, v]) => !!v))),
+      map(results => Object.values(results)),
+      map(results => {
+        const averageMinutes = Math.ceil(meanBy(results, item => item.minutes));
+        const eta = format(addMinutes(new Date(), averageMinutes), 'HH:mm');
+        return {
+          minutes: averageMinutes,
+          eta,
+          distance: meanBy(results, item => item.distance),
+          delay: 'normal' // TODO
+        };
+      }),
+    );
+  }
+
+  private getWazeInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
     const url = this.configService.get('waze.url');
 
     const body = {
@@ -65,6 +88,7 @@ export class TrafficService {
       arriveAt: true
     };
     return this.httpService.post<WazeResponse>(url, body).pipe(
+      timeout(TrafficService.REQUEST_TIMEOUT),
       map(response => response.data),
       tap(({ alternatives }) => alternatives.map(alternative => {
         this.logger.log(`Waze`);
@@ -90,10 +114,11 @@ export class TrafficService {
     );
   }
   
-  getTomTomInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
+  private getTomTomInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
     const url = template(this.configService.get('tomtom.url'))({ fromLat, fromLng, toLat, toLng });
 
     return this.httpService.get<TomTomResponse>(url).pipe(
+      timeout(TrafficService.REQUEST_TIMEOUT),
       map(response => response.data.routes),
       tap(routes => routes.map(route => {
         this.logger.log(`TomTom`);
@@ -124,11 +149,12 @@ export class TrafficService {
     );
   }
 
-  getGoogleMapsInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
+  private getGoogleMapsInfo(fromLat: number, fromLng: number, toLat: number, toLng: number): Observable<CommutingInfo> {
     const url = template(this.configService.get('google-maps.url'))({ fromLat, fromLng, toLat, toLng });
 
     const trafficTypes = ['default', 'light', 'medium', 'heavy'];
     return this.httpService.get<any>(url).pipe(
+      timeout(TrafficService.REQUEST_TIMEOUT),
       map(response => response.data),
       tap(data => {
         this.logger.log(`Google Maps`);

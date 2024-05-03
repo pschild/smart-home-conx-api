@@ -1,6 +1,6 @@
 import { Controller, Get, Query } from '@nestjs/common';
 import { TrafficService } from './traffic.service';
-import { Observable, forkJoin } from 'rxjs';
+import { Observable } from 'rxjs';
 
 @Controller('traffic')
 export class TrafficController {
@@ -13,9 +13,6 @@ export class TrafficController {
     @Query('toLat') toLat: string,
     @Query('toLng') toLng: string,
   ): Observable<any> {
-    const tomtomInfo$ = this.trafficService.getTomTomInfo(+fromLat, +fromLng, +toLat, +toLng);
-    const wazeInfo$ = this.trafficService.getWazeInfo(+fromLat, +fromLng, +toLat, +toLng);
-    const googleMapsInfo$ = this.trafficService.getGoogleMapsInfo(+fromLat, +fromLng, +toLat, +toLng);
-    return forkJoin({ tomtomInfo: tomtomInfo$, wazeInfo: wazeInfo$, googleMapsInfo: googleMapsInfo$ });
+    return this.trafficService.getCombinedResult(+fromLat, +fromLng, +toLat, +toLng);
   }
 }
