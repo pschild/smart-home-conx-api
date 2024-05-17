@@ -26,6 +26,8 @@ interface Poi {
 }
 
 interface PoiDto {
+  latitude: number;
+  longitude: number;
   createdAt: string;
   lastConfirmedAt: string;
   address: string;
@@ -55,6 +57,8 @@ export class BlitzerDeController {
     return this.httpService.get<{ pois: Poi[] }>(url).pipe(
       map(response => response.data.pois),
       map(poiList => poiList.map(poi => ({
+        latitude: +poi.lat,
+        longitude: +poi.lng,
         createdAt: this.parseDate(poi.create_date).toISOString(),
         lastConfirmedAt: this.parseDate(poi.confirm_date).toISOString(),
         address: `${poi.address.street} (${poi.address.city})`,
