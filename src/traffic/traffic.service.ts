@@ -69,8 +69,9 @@ export class TrafficService {
         return {
           minutes: averageMinutes,
           eta,
-          distance: meanBy(results, item => item.distance),
-          delay: 'normal' // TODO
+          distance: parseFloat(meanBy(results, item => item.distance).toFixed(1)),
+          delay: 'normal', // TODO
+          sourcesCount: results.length,
         };
       }),
     );
