@@ -11,7 +11,7 @@ describe('template spec', () => {
     });
 
     cy.visit(Cypress.env('bof_url'));
-    cy.get('#uc-btn-accept-banner').click();
+    cy.get('#usercentrics-root').shadow().find('button').contains('Alles ablehnen').click();
     cy.get('#j_username').then(el => el.val(Cypress.env('bof_username')));
     cy.get('#j_password').then(el => el.val(Cypress.env('bof_password')));
     cy.get('#j_password').type('{enter}');

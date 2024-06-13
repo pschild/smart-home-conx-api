@@ -109,7 +109,7 @@ export class TrafficService {
         };
       }),
       catchError(err => {
-        this.logger.error(`An error occured: ${err}`);
+        this.logger.error(`An error occured for getWazeInfo: ${err}`);
         return of(null);
       }),
     );
@@ -144,7 +144,7 @@ export class TrafficService {
         };
       }),
       catchError(err => {
-        this.logger.error(`An error occured: ${err}`);
+        this.logger.error(`An error occured for getTomTomInfo: ${err}`);
         return of(null);
       }),
     );
@@ -189,7 +189,7 @@ export class TrafficService {
         };
       }),
       catchError(err => {
-        this.logger.error(`An error occured: ${err}`);
+        this.logger.error(`An error occured for getGoogleMapsInfo: ${err}`);
         return of(null);
       }),
     );
