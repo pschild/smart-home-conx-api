@@ -3,8 +3,10 @@ Cypress.Commands.add('getOrdersOfVisibleWeek', () => {
   const daysWithOrder = [];
   return cy.get('table.dataform > tbody > tr').children('td')
     .each(($el, index) => {
-      if ($el.hasClass('tdSelected')) {
+      if ($el.hasClass('speiseplan-menue') && $el.hasClass('tdSelected')) {
         orderIndexList.push(index);
+      } else if ($el.hasClass('speiseplan-sperrtag')) {
+        // Dieser Tag ist ein Sperrtag - keine Bestellung moeglich.
       }
     })
     .then(() => {

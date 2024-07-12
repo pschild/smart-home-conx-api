@@ -1,5 +1,5 @@
 import './util-commands';
-import './bof-commands';
+import './mema-commands';
 
 declare global {
   namespace Cypress {
