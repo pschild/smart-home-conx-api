@@ -48,7 +48,7 @@ export class TrafficService {
 
   private readonly logger = new Logger(TrafficService.name);
 
-  private static REQUEST_TIMEOUT = 1500;
+  private static REQUEST_TIMEOUT = 5000;
 
   constructor(
     private readonly httpService: HttpService,
